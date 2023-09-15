@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { friendProfiles, myProfile } from './src/data';
@@ -19,18 +19,45 @@ export default function App() {
   const onPressArrow = () => {
     setIsOpened(!isOpened);
   };
+
+  const ItemSeparatorComponent = () => <Margin height={13} />;
+  const renderItem = ({ item }) => (
+    <View>
+      <Profile uri={item.uri} name={item.name} introduction={item.introduction} isMe={false} />
+    </View>
+  );
+
+  const ListHeaderComponent = () => (
+    <View style={{ backgroundColor: 'white' }}>
+      <View style={{ flex: 1 }}>
+        <Header />
+        <Margin height={10} />
+        <Profile uri={myProfile.uri} name={myProfile.name} introduction={myProfile.introduction} isMe={true} />
+        <Margin height={15} />
+        <Division />
+        <Margin height={12} />
+        <FriendSection friendProfileLen={friendProfiles.length} onPressArrow={onPressArrow} isOpened={isOpened} />
+      </View>
+    </View>
+  );
+
+  const ListFooterComponent = () => <Margin height={10} />;
+
   return (
     <SafeAreaProvider>
       <SafeAreaView edges={['right', 'left']} style={styles.container}>
-        <View style={{ flex: 1, paddingHorizontal: 15 }}>
-          <Header />
-          <Margin height={10} />
-          <Profile uri={myProfile.uri} name={myProfile.name} introduction={myProfile.introduction} />
-          <Margin height={15} />
-          <Division />
-          <Margin height={12} />
-          <FriendSection friendProfileLen={friendProfiles.length} onPressArrow={onPressArrow} isOpened={isOpened} />
-          <FriendList data={friendProfiles} isOpened={isOpened} />
+        <View style={styles.container}>
+          <FlatList
+            data={isOpened ? friendProfiles : []}
+            contentContainerStyle={{ paddingHorizontal: 15 }}
+            keyExtractor={(_, index) => index}
+            ItemSeparatorComponent={ItemSeparatorComponent}
+            renderItem={renderItem}
+            ListHeaderComponent={ListHeaderComponent}
+            ListFooterComponent={ListFooterComponent}
+            stickyHeaderIndices={[0]}
+            showsVerticalScrollIndicator={false}
+          />
         </View>
         <TabBar selectedTabIdx={selectedTabIdx} setSeletedTabIdx={setSeletedTabIdx} />
       </SafeAreaView>
